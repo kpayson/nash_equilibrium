@@ -6,6 +6,7 @@ class Player:
         self.prefs = [0.5]
         self.total_score = 0
         self.num_games_played = 0
+        random.seed()
     
     def all_preferences(self):
         return self.prefs

@@ -12,9 +12,10 @@ number_of_sessions = int(config['game_simulation_settings']['number_of_sessions'
 number_games_total = (number_of_players -1) * number_of_sessions
 
 pd_matrix = [
-    [(1, -1),(-12, 0)],
+    [(-1, -1),(-12, 0)],
     [(0, -12),(-8, -8)]
-]
+]   
+
 
 
 players = [player.Player(i) for i in range(number_of_players)]
