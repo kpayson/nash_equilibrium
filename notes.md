@@ -6,3 +6,6 @@
 
 # install dependencies
 `pip install -r requirements.txt`
+
+# run the code
+`python3 nash_equilibrium.py`
