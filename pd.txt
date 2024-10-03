@@ -1,0 +1,10 @@
+# pd.txt
+
+# the number below indicates the number of choices,
+# which is helpful for file parsing
+2	
+
+# title of game
+Prisoner’s Dilemma Game
+quiet       -1   -1     -12  0
+confess     0  -12      -8   -8
