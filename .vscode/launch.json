@@ -16,7 +16,7 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/nash_equilibrium.py",
-            "args": ["pd"],
+            "args": ["-g","pd","-c","line"],
             "console": "integratedTerminal"
         }
     ]

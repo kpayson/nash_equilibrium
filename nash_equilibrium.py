@@ -6,16 +6,18 @@ import game_config_parser
 import matplotlib
 
 # Switch to the TkAgg backend
-matplotlib.use('TkAgg')
+# matplotlib.use('TkAgg')
 
 config = configparser.ConfigParser()
 config.read('./config.ini')
 
 # Read the command line using argparse
 arg_parser = argparse.ArgumentParser(description='Nash Equilibrium Simulation')
-arg_parser.add_argument('game', type=str, choices=['pd', 'sh', 'bs'], help='The game to simulate: choices are pd, sh, bs') 
+arg_parser.add_argument('-g','--game', type=str, choices=['pd', 'sh', 'bs'], help='The game to simulate: choices are pd, sh, bs') 
+arg_parser.add_argument('-c','--chart', type=str, choices=['line', 'scatter'], help='The output chart type: choices are line, scatter') 
 args = arg_parser.parse_args()
 game = args.game
+chart_type = args.chart
 
 # Get the payoff matrix, strategies and title of the game
 game_matrix, strategies, title = game_config_parser.GameConfigParser(game).parse()
@@ -40,7 +42,7 @@ for s in range(number_of_sessions):
             players[p1].update(player1_score, player1_strategy)
             players[p2].update(player2_score, player2_strategy)
 
-def plot_result(p1,p2,x_pos, y_pos):
+def line_chart_plot_result(p1,p2,x_pos, y_pos):
     # Create a new figure
     plt.figure()
       
@@ -72,11 +74,95 @@ def plot_result(p1,p2,x_pos, y_pos):
     #Show the plot
     plt.show(block=False)
     
-plot_result(0, 1, 100, 100)
-plot_result(2, 3, 500, 100)
-plot_result(3, 4, 900, 100)
-plot_result(5, 6, 100, 500)
-plot_result(7, 8, 500, 500)
+    
+def scatter_plot_chart_result(p1,p2,x_pos, y_pos):
+    # Create a new figure
+    plt.figure()
+    
+    def cluster_sizes(strats, epsilon=0.08):
+        cluster_sizes = []
+        for strat1 in strats:
+            count = 0
+            for strat2 in strats:
+                abs_diff = abs(strat1 - strat2)
+                if abs_diff > epsilon:
+                    count += 1
+            cluster_sizes.append(count)
+        return cluster_sizes
+    
+    dot_scale = 0.1
+    p1_strats_unique = set(players[p1].all_preferences())
+    p1_y_vals = list(p1_strats_unique)
+    p1_x_vals = [1 - y_val for y_val in p1_y_vals] 
+    p1_sizes = [s*dot_scale for s in cluster_sizes(p1_y_vals)]
+    
+    p2_strats_unique = set(players[p2].all_preferences())
+    p2_y_vals = list(p2_strats_unique)
+    p2_x_vals = [1 - y_val for y_val in p2_y_vals]
+    p2_sizes = [s*dot_scale for s in cluster_sizes(p2_y_vals)]
+      
+ 
+    # plot
+    fig, ax = plt.subplots()
 
+    # adjusting transparency of scatter points by using 'alpha' parameter
+    # https://dfrieds.com/data-visualizations/customize-scatter-plot-styles-python-matplotlib.html#adjust-the-size-of-scatter-points
+    ax.scatter(p1_x_vals, p1_y_vals, s=p1_sizes, c='blue', label='P1', alpha=0.3)
+    ax.scatter(p2_x_vals, p2_y_vals, s=p2_sizes, c='blue', label='P2', alpha=0.4)
+
+    # labels and title
+    ax.set_xlabel(strategies[0], fontsize=10)
+    ax.set_ylabel(strategies[1], fontsize=10)
+    ax.set_title(title)
+
+    # show grid
+    ax.grid(True)
+
+    # create some mock scatterpoints for the legend, otherwise
+    # the circles in the legend are too big
+    # this seems like not the best way to do it but i'm tired
+    p1LegendX = [0.5]
+    p1LegendY = [0.5]
+    p1LegendSize = [50]
+    p1CollectionLegend = ax.scatter(p1LegendX, p1LegendY, s=p1LegendSize, c='blue', alpha=0.3)
+
+    p2LegendX = [0.5]
+    p2LegendY = [0.5]
+    p2LegendSize = [50]
+    p2CollectionLegend = ax.scatter(p2LegendX, p2LegendY, s=p2LegendSize, c='orange', alpha=0.4)
+
+    plt.legend([p1CollectionLegend, p2CollectionLegend], ['P1', 'P2'])
+    # end legend code
+
+    # show plot
+    plt.show()
+
+    # fig.canvas.manager.set_window_title(f"Game Result: Player {p1} vs Player {p2}")
+
+    # # Move the window to the specified position
+    # backend = plt.get_backend()
+    # if backend == 'TkAgg':
+    #     fig.canvas.manager.window.wm_geometry(f"+{x_pos}+{y_pos}")
+    # elif backend == 'Qt5Agg':
+    #     fig.canvas.manager.window.setGeometry(x_pos, y_pos, 800, 600)
+    # else:
+    #     print(f"Backend {backend} is not supported for window positioning")
+        
+    # #Show the plot
+    # plt.show(block=False)
+
+if(chart_type == 'line'):
+    line_chart_plot_result(0, 1, 100, 100)
+    line_chart_plot_result(2, 3, 500, 100)
+    line_chart_plot_result(3, 4, 900, 100)
+    line_chart_plot_result(5, 6, 100, 500)
+    line_chart_plot_result(7, 8, 500, 500)
+
+elif(chart_type == 'scatter'):
+    scatter_plot_chart_result(0, 1, 100, 100)
+    scatter_plot_chart_result(2, 3, 500, 100)
+    scatter_plot_chart_result(3, 4, 900, 100)
+    scatter_plot_chart_result(5, 6, 100, 500)
+    scatter_plot_chart_result(7, 8, 500, 500)
 # Keep all windows open
 plt.show()
