@@ -9,3 +9,4 @@
 
 # run the code -g=pd or sh or bs -c=line or scatter
 ex `python3 nash_equilibrium.py -g sh -c scatter`
+ex `python3 nash_equilibrium.py -g pd -c line`

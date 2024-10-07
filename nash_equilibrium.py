@@ -4,9 +4,10 @@ import matplotlib.pyplot as plt
 import player
 import game_config_parser
 import matplotlib
+import random
 
 # Switch to the TkAgg backend
-# matplotlib.use('TkAgg')
+matplotlib.use('TkAgg')
 
 config = configparser.ConfigParser()
 config.read('./config.ini')
@@ -79,36 +80,40 @@ def scatter_plot_chart_result(p1,p2,x_pos, y_pos):
     # Create a new figure
     plt.figure()
     
-    def cluster_sizes(strats, epsilon=0.08):
-        cluster_sizes = []
-        for strat1 in strats:
-            count = 0
-            for strat2 in strats:
-                abs_diff = abs(strat1 - strat2)
-                if abs_diff > epsilon:
-                    count += 1
-            cluster_sizes.append(count)
-        return cluster_sizes
+    def count_frequencies(numbers):
+        frequency_dict = {}
+        for number in numbers:
+            if number in frequency_dict:
+                frequency_dict[number] += 1
+            else:
+                frequency_dict[number] = 1
+        return frequency_dict
     
-    dot_scale = 0.1
-    p1_strats_unique = set(players[p1].all_preferences())
+    dot_scale = 10
+
+    p1_freq_dict = count_frequencies(players[p1].all_preferences())
+    p1_strats_unique = list(p1_freq_dict.keys())
+    p1_counts = list(p1_freq_dict.values())
+    p1_sizes = [s*dot_scale for s in p1_counts]
+    
+    p2_freq_dict = count_frequencies(players[p2].all_preferences())
+    p2_strats_unique = list(p2_freq_dict.keys())
+    p2_counts = list(p2_freq_dict.values())
+    p2_sizes = [s*dot_scale for s in p2_counts]
+    
     p1_y_vals = list(p1_strats_unique)
     p1_x_vals = [1 - y_val for y_val in p1_y_vals] 
-    p1_sizes = [s*dot_scale for s in cluster_sizes(p1_y_vals)]
-    
-    p2_strats_unique = set(players[p2].all_preferences())
+
     p2_y_vals = list(p2_strats_unique)
     p2_x_vals = [1 - y_val for y_val in p2_y_vals]
-    p2_sizes = [s*dot_scale for s in cluster_sizes(p2_y_vals)]
-      
- 
+  
     # plot
     fig, ax = plt.subplots()
 
     # adjusting transparency of scatter points by using 'alpha' parameter
     # https://dfrieds.com/data-visualizations/customize-scatter-plot-styles-python-matplotlib.html#adjust-the-size-of-scatter-points
     ax.scatter(p1_x_vals, p1_y_vals, s=p1_sizes, c='blue', label='P1', alpha=0.3)
-    ax.scatter(p2_x_vals, p2_y_vals, s=p2_sizes, c='blue', label='P2', alpha=0.4)
+    ax.scatter(p2_x_vals, p2_y_vals, s=p2_sizes, c='orange', label='P2', alpha=0.4)
 
     # labels and title
     ax.set_xlabel(strategies[0], fontsize=10)
@@ -119,8 +124,6 @@ def scatter_plot_chart_result(p1,p2,x_pos, y_pos):
     ax.grid(True)
 
     # create some mock scatterpoints for the legend, otherwise
-    # the circles in the legend are too big
-    # this seems like not the best way to do it but i'm tired
     p1LegendX = [0.5]
     p1LegendY = [0.5]
     p1LegendSize = [50]
@@ -132,29 +135,24 @@ def scatter_plot_chart_result(p1,p2,x_pos, y_pos):
     p2CollectionLegend = ax.scatter(p2LegendX, p2LegendY, s=p2LegendSize, c='orange', alpha=0.4)
 
     plt.legend([p1CollectionLegend, p2CollectionLegend], ['P1', 'P2'])
-    # end legend code
 
-    # show plot
-    plt.show()
-
-    # fig.canvas.manager.set_window_title(f"Game Result: Player {p1} vs Player {p2}")
-
-    # # Move the window to the specified position
-    # backend = plt.get_backend()
-    # if backend == 'TkAgg':
-    #     fig.canvas.manager.window.wm_geometry(f"+{x_pos}+{y_pos}")
-    # elif backend == 'Qt5Agg':
-    #     fig.canvas.manager.window.setGeometry(x_pos, y_pos, 800, 600)
-    # else:
-    #     print(f"Backend {backend} is not supported for window positioning")
+    fig.canvas.manager.set_window_title(f"Game Result: Player {p1} vs Player {p2}")
+    # Move the window to the specified position
+    backend = plt.get_backend()
+    if backend == 'TkAgg':
+        fig.canvas.manager.window.wm_geometry(f"+{x_pos}+{y_pos}")
+    elif backend == 'Qt5Agg':
+        fig.canvas.manager.window.setGeometry(x_pos, y_pos, 800, 600)
+    else:
+        print(f"Backend {backend} is not supported for window positioning")
         
-    # #Show the plot
-    # plt.show(block=False)
+    #Show the plot
+    plt.show(block=False)
 
 if(chart_type == 'line'):
     line_chart_plot_result(0, 1, 100, 100)
-    line_chart_plot_result(2, 3, 500, 100)
-    line_chart_plot_result(3, 4, 900, 100)
+    line_chart_plot_result(3, 5, 500, 100)
+    line_chart_plot_result(2, 7, 900, 100)
     line_chart_plot_result(5, 6, 100, 500)
     line_chart_plot_result(7, 8, 500, 500)
 
